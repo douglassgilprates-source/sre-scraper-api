@@ -1,29 +1,31 @@
 import express from "express";
 import fetch from "node-fetch";
-import cheerio from "cheerio";
+import { load } from "cheerio";
 
 const app = express();
 
-app.get("/licitacoes", async (req, res) => {
+app.get("/", async (req, res) => {
   try {
-    const url = "https://srevarrinha.educacao.mg.gov.br/index.php/licitacoes";
-
-    const response = await fetch(url);
+    const response = await fetch("https://srevarginha.educacao.mg.gov.br/index.php/licitacoes");
     const html = await response.text();
 
-    const $ = cheerio.load(html);
-    const cards = [];
+    const $ = load(html);
 
-    $("a[href*='/licitacoes/']").each((i, el) => {
+    let results = [];
+
+    $("a").each((i, el) => {
       const link = $(el).attr("href");
-      const title = $(el).text().trim();
-      cards.push({ title, link });
+      const text = $(el).text().trim();
+
+      if (link && link.includes("licitacoes")) {
+        results.push({ text, link });
+      }
     });
 
-    res.json(cards);
+    res.json(results);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-app.listen(3000, () => console.log("API rodando na porta 3000"));
+app.listen(3000, () => console.log("API rodando na Render..."));
